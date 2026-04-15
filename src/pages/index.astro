@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allLetters = await getCollection('letters');
+
+// Group by company
+const companiesMap = new Map<string, { slug: string; name: string; count: number }>();
+
+for (const letter of allLetters) {
+  const companySlug = letter.slug.split('/')[0];
+  if (!companiesMap.has(companySlug)) {
+    companiesMap.set(companySlug, {
+      slug: companySlug,
+      name: letter.data.company,
+      count: 0,
+    });
+  }
+  companiesMap.get(companySlug)!.count++;
+}
+
+const companies = Array.from(companiesMap.values()).sort((a, b) =>
+  b.count - a.count || a.name.localeCompare(b.name, 'zh-CN')
+);
+
+const totalLetters = allLetters.length;
+const totalCompanies = companies.length;
+const base = import.meta.env.BASE_URL;
+
+// Data for client-side search
+const companiesJson = JSON.stringify(companies);
+---
+
+<BaseLayout title="致股东信 — 中国上市公司致股东信合集">
+  <section class="hero">
+    <h1 class="hero__title">致股东信</h1>
+    <p class="hero__subtitle">
+      已收录 <span class="hero__count">{totalCompanies}</span> 家上市公司，共 <span class="hero__count">{totalLetters}</span> 封信
+    </p>
+  </section>
+
+  <div class="search">
+    <input
+      type="text"
+      class="search__input"
+      id="search-input"
+      placeholder="输入公司名称"
+      autocomplete="off"
+    />
+  </div>
+
+  <section class="cards-section">
+    <div class="cards-grid" id="cards-grid">
+      {companies.map((company) => (
+        <a href={`${base}company/${company.slug}/`} class="card" data-company={company.name}>
+          <div class="card__name">{company.name}</div>
+          <div class="card__count">{company.count} 封</div>
+        </a>
+      ))}
+    </div>
+
+    <div class="empty-state" id="empty-state" style="display: none;">
+      <p class="empty-state__title">未找到匹配的公司</p>
+      <p class="empty-state__desc">请尝试其他关键词</p>
+    </div>
+
+    <div class="show-more" id="show-more">
+      <button class="show-more__btn" type="button">查看全部</button>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline define:vars={{ companiesJson, initialCount: 5 }}>
+  const companies = JSON.parse(companiesJson);
+  const grid = document.getElementById('cards-grid');
+  const cards = Array.from(grid.querySelectorAll('.card'));
+  const emptyState = document.getElementById('empty-state');
+  const showMoreWrapper = document.getElementById('show-more');
+  const showMoreBtn = showMoreWrapper.querySelector('.show-more__btn');
+  const searchInput = document.getElementById('search-input');
+
+  let showAll = companies.length <= initialCount;
+
+  function updateVisibility() {
+    const query = searchInput.value.trim().toLowerCase();
+    const isSearching = query.length > 0;
+    let visibleCount = 0;
+
+    cards.forEach(function(card, i) {
+      const name = card.getAttribute('data-company').toLowerCase();
+      const matchesSearch = !isSearching || name.includes(query);
+      const withinLimit = isSearching || showAll || i < initialCount;
+      const visible = matchesSearch && withinLimit;
+
+      card.style.display = visible ? '' : 'none';
+      if (matchesSearch) visibleCount++;
+    });
+
+    emptyState.style.display = visibleCount === 0 && isSearching ? '' : 'none';
+
+    // Show "show more" only if not searching, not showing all, and there are hidden cards
+    const hasHidden = !showAll && companies.length > initialCount;
+    showMoreWrapper.style.display = (!isSearching && hasHidden) ? '' : 'none';
+  }
+
+  searchInput.addEventListener('input', updateVisibility);
+
+  showMoreBtn.addEventListener('click', function() {
+    showAll = true;
+    // Reset animations for newly visible cards
+    cards.forEach(function(card) {
+      card.style.animation = 'none';
+      card.offsetHeight; // trigger reflow
+      card.style.animation = '';
+    });
+    updateVisibility();
+  });
+
+  updateVisibility();
+</script>

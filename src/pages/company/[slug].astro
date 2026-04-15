@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const allLetters = await getCollection('letters');
+
+  // Group by company slug
+  const companiesMap = new Map<string, { name: string; letters: typeof allLetters }>();
+
+  for (const letter of allLetters) {
+    const companySlug = letter.slug.split('/')[0];
+    if (!companiesMap.has(companySlug)) {
+      companiesMap.set(companySlug, { name: letter.data.company, letters: [] });
+    }
+    companiesMap.get(companySlug)!.letters.push(letter);
+  }
+
+  return Array.from(companiesMap.entries()).map(([slug, data]) => ({
+    params: { slug },
+    props: {
+      companyName: data.name,
+      letters: data.letters.sort((a, b) => b.data.year - a.data.year),
+    },
+  }));
+}
+
+interface Props {
+  companyName: string;
+  letters: Awaited<ReturnType<typeof getCollection<'letters'>>>;
+}
+
+const { slug } = Astro.params;
+const { companyName, letters } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={`${companyName} — 致股东信`}>
+  <nav class="breadcrumb">
+    <a href={base}>首页</a>
+    <span class="breadcrumb__sep">/</span>
+    <span>{companyName}</span>
+  </nav>
+
+  <div class="company-header">
+    <h1 class="company-header__name">{companyName}</h1>
+    <p class="company-header__count">共 {letters.length} 封致股东信</p>
+  </div>
+
+  <ul class="letters-list">
+    {letters.map((letter) => (
+      <li class="letters-list__item">
+        <a href={`${base}letter/${letter.slug}/`} class="letters-list__link">
+          <span class="letters-list__year">{letter.data.year}</span>
+          <span style="display: flex; align-items: center;">
+            <span class="letters-list__title">{letter.data.title}</span>
+            <span class="letters-list__arrow">→</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
