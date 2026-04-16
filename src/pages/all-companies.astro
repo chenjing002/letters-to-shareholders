@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { buildColorMap } from '../utils/company-colors';
+
+const allLetters = await getCollection('letters');
+
+// Group by company
+const companiesMap = new Map<string, { slug: string; name: string; count: number }>();
+
+for (const letter of allLetters) {
+  const companySlug = letter.slug.split('/')[0];
+  if (!companiesMap.has(companySlug)) {
+    companiesMap.set(companySlug, {
+      slug: companySlug,
+      name: letter.data.company,
+      count: 0,
+    });
+  }
+  companiesMap.get(companySlug)!.count++;
+}
+
+const companies = Array.from(companiesMap.values()).sort((a, b) =>
+  b.count - a.count || a.name.localeCompare(b.name, 'zh-CN')
+);
+
+const totalCompanies = companies.length;
+const totalLetters = allLetters.length;
+const base = import.meta.env.BASE_URL;
+const colorMap = buildColorMap(companies.map(c => c.slug));
+---
+
+<BaseLayout title="全部公司 — 致股东信">
+  <nav class="breadcrumb">
+    <a href={base}>首页</a>
+    <span class="breadcrumb__sep">/</span>
+    <span>全部公司</span>
+  </nav>
+
+  <section class="all-companies-header">
+    <p class="all-companies-header__stats">
+      {totalCompanies} 家上市公司 | {totalLetters} 封致股东信
+    </p>
+  </section>
+
+  <div class="search search--all">
+    <input
+      type="text"
+      class="search__input"
+      id="filter-input"
+      placeholder="输入公司名称"
+      autocomplete="off"
+    />
+  </div>
+
+  <section class="all-companies-grid" id="companies-grid">
+    {companies.map((company, i) => {
+      const color = colorMap[company.slug];
+      return (
+        <a
+          href={`${base}company/${company.slug}/`}
+          class="company-card"
+          style={`--cc-bg: ${color.bg}; --cc-text: ${color.text};`}
+          data-name={company.name}
+        >
+          <div class="company-card__name">{company.name}</div>
+          <div class="company-card__count">{company.count} 封</div>
+        </a>
+      );
+    })}
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  var filterInput = document.getElementById('filter-input');
+  var grid = document.getElementById('companies-grid');
+  var cards = grid.querySelectorAll('.company-card');
+
+  filterInput.addEventListener('input', function() {
+    var query = filterInput.value.trim().toLowerCase();
+    cards.forEach(function(card) {
+      var name = card.getAttribute('data-name').toLowerCase();
+      card.style.display = name.indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+</script>

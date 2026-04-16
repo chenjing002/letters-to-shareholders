@@ -5,9 +5,10 @@ import ThemeToggle from '../components/ThemeToggle.astro';
 interface Props {
   title: string;
   description?: string;
+  bodyClass?: string;
 }
 
-const { title, description = '中国上市公司致股东信合集' } = Astro.props;
+const { title, description = '中国上市公司致股东信合集', bodyClass } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -31,7 +32,7 @@ const base = import.meta.env.BASE_URL;
       })();
     </script>
   </head>
-  <body>
+  <body class={bodyClass}>
     <div class="container">
       <header class="site-header">
         <a href={base} class="site-header__logo">致股东信</a>
