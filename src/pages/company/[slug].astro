@@ -34,6 +34,15 @@ const { slug } = Astro.params;
 const { companyName, letters } = Astro.props;
 const base = import.meta.env.BASE_URL;
 
+// Load intro if one exists for this company
+const allIntros = await getCollection('intros');
+const introEntry = allIntros.find((e) => e.slug === slug) ?? null;
+let IntroContent: any = null;
+if (introEntry) {
+  const rendered = await introEntry.render();
+  IntroContent = rendered.Content;
+}
+
 // Render all letters
 const rendered = await Promise.all(
   letters.map(async (letter) => {
@@ -63,9 +72,21 @@ const rendered = await Promise.all(
       <div class="compare-hint" id="compareHint">选择2个年份 👇</div>
 
       <div class="reader__years">
+        {IntroContent && (
+          <button
+            class:list={["reader__year-btn", "reader__year-btn--intro", "is-active"]}
+            data-year="intro"
+          >
+            <span class="reader__year-dot"></span>
+            <svg class="intro-icon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 1L14.59 9.41L24 12L14.59 14.59L12 23L9.41 14.59L0 12L9.41 9.41L12 1Z"/>
+            </svg>
+            综述
+          </button>
+        )}
         {letters.map((letter, i) => (
           <button
-            class:list={["reader__year-btn", { "is-active": i === 0 }]}
+            class:list={["reader__year-btn", { "is-active": !IntroContent && i === 0 }]}
             data-year={letter.data.year}
           >
             <span class="reader__year-dot"></span>
@@ -77,9 +98,19 @@ const rendered = await Promise.all(
 
     <!-- Single letter view -->
     <div class="reader__content" id="singleView">
+      {IntroContent && (
+        <article
+          class:list={["reader__letter", "is-active"]}
+          data-year="intro"
+        >
+          <div class="prose">
+            <IntroContent />
+          </div>
+        </article>
+      )}
       {rendered.map(({ year, Content }, i) => (
         <article
-          class:list={["reader__letter", { "is-active": i === 0 }]}
+          class:list={["reader__letter", { "is-active": !IntroContent && i === 0 }]}
           data-year={year}
         >
           <div class="prose">
@@ -102,6 +133,22 @@ const rendered = await Promise.all(
     </div>
   </div>
 </BaseLayout>
+
+<style is:global>
+  .reader__year-btn--intro {
+    color: var(--accent);
+  }
+  .reader__year-btn--intro:hover {
+    color: var(--accent);
+  }
+  .reader__year-btn--intro.is-active {
+    color: var(--accent);
+  }
+  .intro-icon {
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+</style>
 
 <script>
   document.addEventListener('astro:page-load', setup);
@@ -169,7 +216,7 @@ const rendered = await Promise.all(
         colEl.classList.remove('has-content');
         return;
       }
-      labelEl.textContent = year + '年';
+      labelEl.textContent = year === 'intro' ? '综述' : year + '年';
       const art = document.querySelector<HTMLElement>(`.reader__letter[data-year="${year}"]`);
       bodyEl.innerHTML = art ? art.querySelector('.prose')!.innerHTML : '';
       colEl.scrollTop = 0;
@@ -184,12 +231,16 @@ const rendered = await Promise.all(
       const leftCol = document.getElementById('compareLeft')!;
       const rightCol = document.getElementById('compareRight')!;
 
-      // Sort: newer year on the left, older on the right
-      const sorted = [...compareYears].sort((a, b) => Number(b) - Number(a));
-      const [newer, older] = sorted;
+      // Sort: put intro first if selected, otherwise newer year on left
+      const sorted = [...compareYears].sort((a, b) => {
+        if (a === 'intro') return -1;
+        if (b === 'intro') return 1;
+        return Number(b) - Number(a);
+      });
+      const [left, right] = sorted;
 
-      fillCol(leftLabel, leftBody, leftCol, newer ?? null);
-      fillCol(rightLabel, rightBody, rightCol, older ?? null);
+      fillCol(leftLabel, leftBody, leftCol, left ?? null);
+      fillCol(rightLabel, rightBody, rightCol, right ?? null);
 
       compareView!.classList.toggle('has-content', compareYears.length > 0);
     }

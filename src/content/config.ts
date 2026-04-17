@@ -11,4 +11,11 @@ const letters = defineCollection({
   }),
 });
 
-export const collections = { letters };
+const intros = defineCollection({
+  type: 'content',
+  schema: z.object({
+    company: z.string(),
+  }),
+});
+
+export const collections = { letters, intros };
