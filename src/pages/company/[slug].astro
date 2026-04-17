@@ -278,5 +278,40 @@ const rendered = await Promise.all(
         }
       });
     });
+
+    // ── Inline audio player (podcast card) ───────────
+    document.querySelectorAll<HTMLElement>('.audio-card').forEach((card) => {
+      const btn = card.querySelector<HTMLButtonElement>('[data-audio-toggle]');
+      const audio = card.querySelector<HTMLAudioElement>('[data-audio-el]');
+      if (!btn || !audio) return;
+
+      btn.addEventListener('click', () => {
+        if (audio.paused) {
+          // Pause any other audio elements on the page
+          document.querySelectorAll<HTMLAudioElement>('[data-audio-el]').forEach((a) => {
+            if (a !== audio && !a.paused) {
+              a.pause();
+              a.closest('.audio-card')?.classList.remove('is-playing');
+            }
+          });
+          audio.play();
+        } else {
+          audio.pause();
+        }
+      });
+
+      audio.addEventListener('play', () => {
+        card.classList.add('is-playing');
+        btn.setAttribute('aria-label', '暂停');
+      });
+      audio.addEventListener('pause', () => {
+        card.classList.remove('is-playing');
+        btn.setAttribute('aria-label', '播放');
+      });
+      audio.addEventListener('ended', () => {
+        card.classList.remove('is-playing');
+        btn.setAttribute('aria-label', '播放');
+      });
+    });
   }
 </script>

@@ -4,6 +4,19 @@ company: "万科 A"
 
 # 从盖房子到化险求生：万科股东信里的长期轨迹
 
+<div class="audio-card">
+  <img class="audio-card__cover" src="https://image.xyzcdn.net/Ft9MXObpftQNtjFDfkHCZQXMMirQ.png@small" alt="" loading="lazy" />
+  <div class="audio-card__meta">
+    <a class="audio-card__title" href="https://www.xiaoyuzhoufm.com/episodes/69e1e1f9b977fb2c47304d7a" target="_blank" rel="noopener">E63. 从盖房子到化险求生：万科1993-2025年股东信里的长期轨迹</a>
+    <span class="audio-card__source">TZB阅览 · 小宇宙</span>
+  </div>
+  <button class="audio-card__play" type="button" data-audio-toggle aria-label="播放">
+    <svg class="audio-card__icon audio-card__icon--play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    <svg class="audio-card__icon audio-card__icon--pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+  </button>
+  <audio data-audio-el preload="none" src="https://media.xyzcdn.net/675556999b725cdf2114fa44/lqy769mxOUlv-7Fhs8O8viLBR9kT.m4a"></audio>
+</div>
+
 如果只看不同年份的口号，万科像是在讲几套故事：早年讲专业化与扩张，中段讲白银时代与服务转型，近年讲安全、化险与自救。但把1993年至2025年的股东信连起来看，会发现这其实是一条不断收缩、再外扩、又被迫收缩的轨迹。它最早不是一个单纯的地产公司，而是在房地产、投资、贸易、零售、工业、广告、影视之间寻找组合；到2001年前后，才明确完成对零售等业务的退出，把自己锁定为"专业的城市住宅开发商"。从那以后很长一段时间，万科真正擅长、也反复证明自己的，不是"讲新故事"，而是把住宅开发做成一套可复制的工业化、标准化、全国化生意。
 
 这种自我定义，在2004至2013年的信里最完整。2004年它回顾二十年历史，把"简单、透明、规范、均好"当成方法论，承认自己曾走过多元化弯路，并明确说专业化是唯一可行的道路。2005至2006年，外界围绕房价、泡沫、调控激烈争论，万科的语气却不是顺着繁荣去夸大机会，而是反复强调房价过快上涨对行业未必是好事，调控有助于行业回归理性，企业应坚持"现金为王"、客户导向、风险管理和行业公民责任。到2011至2012年，这套方法进一步落到更具体的经营纪律上：小户型、装修房、住宅产业化，"不囤地，不捂盘，不当地王"，"盖有人住的好房子"。从多封信看，万科在这一阶段想做的，不只是卖房，而是用快速周转、谨慎投资、标准化生产和品牌信用，把住宅开发从粗放生意改造成更像制造业的生意。
