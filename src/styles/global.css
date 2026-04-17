@@ -700,7 +700,10 @@ h6 {
     background: #ffffff;
     flex-shrink: 0;
     position: relative;
-    transition: border-color 0.2s ease, background-color 0.2s ease, border-width 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        border-width 0.2s ease;
 }
 
 .reader.is-comparing .reader__year-dot::after {
@@ -730,11 +733,17 @@ h6 {
     background: var(--bg);
 }
 
-[data-theme="dark"] .reader.is-comparing .reader__year-btn.is-active .reader__year-dot {
+[data-theme="dark"]
+    .reader.is-comparing
+    .reader__year-btn.is-active
+    .reader__year-dot {
     background: var(--accent);
 }
 
-[data-theme="dark"] .reader.is-comparing .reader__year-btn.is-active .reader__year-dot::after {
+[data-theme="dark"]
+    .reader.is-comparing
+    .reader__year-btn.is-active
+    .reader__year-dot::after {
     background: var(--bg);
 }
 
