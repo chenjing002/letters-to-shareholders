@@ -39,6 +39,7 @@ const SLUG_MAP = {
   "格力电器": "gree",
   "美的集团": "midea",
   "中国平安": "pingan",
+  "龙湖集团": "longfor",
 };
 
 // ── helpers ─────────────────────────────────────────────────────
@@ -126,8 +127,9 @@ for (const dir of companyDirs.sort()) {
     }
     const year = Number(yearMatch[1]);
 
-    // Read original body (no frontmatter)
-    const originalBody = fs.readFileSync(path.join(srcDir, file), "utf-8");
+    // Read original file; strip any frontmatter that may already exist in the source
+    const originalRaw = fs.readFileSync(path.join(srcDir, file), "utf-8");
+    const originalBody = parseFrontmatter(originalRaw).body;
 
     // Check for existing content collection file
     const destFile = path.join(destDir, `${year}.md`);
