@@ -5,7 +5,7 @@ import { buildColorMap } from '../utils/company-colors';
 
 const allLetters = await getCollection('letters');
 
-// Group by company
+// ── Group by company ────────────────────────────────────────
 const companiesMap = new Map<string, { slug: string; name: string; count: number }>();
 
 for (const letter of allLetters) {
@@ -24,10 +24,24 @@ const companies = Array.from(companiesMap.values()).sort((a, b) =>
   b.count - a.count || a.name.localeCompare(b.name, 'zh-CN')
 );
 
+// ── Group by year ───────────────────────────────────────────
+const yearsMap = new Map<number, Set<string>>();
+for (const letter of allLetters) {
+  const year = letter.data.year;
+  const companySlug = letter.slug.split('/')[0];
+  if (!yearsMap.has(year)) yearsMap.set(year, new Set());
+  yearsMap.get(year)!.add(companySlug);
+}
+
+const years = Array.from(yearsMap.entries())
+  .map(([year, slugs]) => ({ year, count: slugs.size }))
+  .sort((a, b) => b.year - a.year);
+
 const totalCompanies = companies.length;
 const totalLetters = allLetters.length;
 const base = import.meta.env.BASE_URL;
 const colorMap = buildColorMap(companies.map(c => c.slug));
+const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
 ---
 
 <BaseLayout title="全部公司 — 致股东信">
@@ -53,8 +67,25 @@ const colorMap = buildColorMap(companies.map(c => c.slug));
     />
   </div>
 
-  <section class="all-companies-grid" id="companies-grid">
-    {companies.map((company, i) => {
+  <div class="view-toggle" role="tablist" aria-label="查看方式">
+    <button
+      type="button"
+      role="tab"
+      class="view-toggle__btn is-active"
+      data-view="company"
+      aria-selected="true"
+    >按公司</button>
+    <button
+      type="button"
+      role="tab"
+      class="view-toggle__btn"
+      data-view="year"
+      aria-selected="false"
+    >按年份</button>
+  </div>
+
+  <section class="all-companies-grid" id="companies-grid" data-active>
+    {companies.map((company) => {
       const color = colorMap[company.slug];
       return (
         <a
@@ -69,18 +100,68 @@ const colorMap = buildColorMap(companies.map(c => c.slug));
       );
     })}
   </section>
+
+  <section class="all-companies-grid" id="years-grid" hidden>
+    {years.map((y) => {
+      const color = yearColorMap[`year-${y.year}`];
+      return (
+        <a
+          href={`${base}year/${y.year}/`}
+          class="company-card year-card"
+          style={`--cc-bg: ${color.bg}; --cc-text: ${color.text};`}
+        >
+          <div class="company-card__name">{y.year} 年</div>
+          <div class="company-card__count">{y.count} 家公司</div>
+        </a>
+      );
+    })}
+  </section>
 </BaseLayout>
 
 <script is:inline>
-  var filterInput = document.getElementById('filter-input');
-  var grid = document.getElementById('companies-grid');
-  var cards = grid.querySelectorAll('.company-card');
+  (function() {
+    var filterInput = document.getElementById('filter-input');
+    var companiesGrid = document.getElementById('companies-grid');
+    var yearsGrid = document.getElementById('years-grid');
+    var companyCards = companiesGrid.querySelectorAll('.company-card');
+    var viewBtns = document.querySelectorAll('.view-toggle__btn');
 
-  filterInput.addEventListener('input', function() {
-    var query = filterInput.value.trim().toLowerCase();
-    cards.forEach(function(card) {
-      var name = card.getAttribute('data-name').toLowerCase();
-      card.style.display = name.indexOf(query) !== -1 ? '' : 'none';
+    var currentView = 'company';
+
+    function applyFilter() {
+      var query = filterInput.value.trim().toLowerCase();
+      companyCards.forEach(function(card) {
+        var name = card.getAttribute('data-name').toLowerCase();
+        card.style.display = name.indexOf(query) !== -1 ? '' : 'none';
+      });
+    }
+
+    function setView(view) {
+      currentView = view;
+      viewBtns.forEach(function(b) {
+        var active = b.getAttribute('data-view') === view;
+        b.classList.toggle('is-active', active);
+        b.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      if (view === 'company') {
+        companiesGrid.hidden = false;
+        yearsGrid.hidden = true;
+        filterInput.disabled = false;
+        filterInput.placeholder = '输入公司名称';
+      } else {
+        companiesGrid.hidden = true;
+        yearsGrid.hidden = false;
+        filterInput.disabled = true;
+        filterInput.placeholder = '按年份浏览';
+      }
+    }
+
+    filterInput.addEventListener('input', applyFilter);
+    viewBtns.forEach(function(b) {
+      b.addEventListener('click', function() {
+        setView(b.getAttribute('data-view'));
+      });
     });
-  });
+  })();
 </script>
