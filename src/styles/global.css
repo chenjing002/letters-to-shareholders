@@ -1097,6 +1097,13 @@ h6 {
     text-align: justify;
 }
 
+.prose h1 {
+    font-size: 1.75rem;
+    margin-top: 0;
+    margin-bottom: 1.25em;
+    line-height: 1.35;
+}
+
 .prose h2 {
     font-size: 1.375rem;
     margin-top: 2.5em;
