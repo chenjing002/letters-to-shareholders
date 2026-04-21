@@ -45,6 +45,16 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
 ---
 
 <BaseLayout title="全部公司 — 致股东信">
+  <script is:inline>
+    // Restore view mode before paint to avoid flicker
+    try {
+      var v = sessionStorage.getItem('all-companies:view');
+      if (v === 'year' || v === 'company') {
+        document.documentElement.setAttribute('data-all-view', v);
+      }
+    } catch (e) {}
+  </script>
+
   <nav class="breadcrumb">
     <a href={base}>首页</a>
     <span class="breadcrumb__sep">/</span>
@@ -101,7 +111,7 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
     })}
   </section>
 
-  <section class="all-companies-grid" id="years-grid" hidden>
+  <section class="all-companies-grid" id="years-grid">
     {years.map((y) => {
       const color = yearColorMap[`year-${y.year}`];
       return (
@@ -122,11 +132,14 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
   (function() {
     var filterInput = document.getElementById('filter-input');
     var companiesGrid = document.getElementById('companies-grid');
-    var yearsGrid = document.getElementById('years-grid');
     var companyCards = companiesGrid.querySelectorAll('.company-card');
     var viewBtns = document.querySelectorAll('.view-toggle__btn');
 
-    var currentView = 'company';
+    var STORAGE_KEY = 'all-companies:view';
+    var currentView =
+      document.documentElement.getAttribute('data-all-view') === 'year'
+        ? 'year'
+        : 'company';
 
     function applyFilter() {
       var query = filterInput.value.trim().toLowerCase();
@@ -138,6 +151,9 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
 
     function setView(view) {
       currentView = view;
+      try { sessionStorage.setItem(STORAGE_KEY, view); } catch (e) {}
+      document.documentElement.setAttribute('data-all-view', view);
+
       viewBtns.forEach(function(b) {
         var active = b.getAttribute('data-view') === view;
         b.classList.toggle('is-active', active);
@@ -145,17 +161,16 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
       });
 
       if (view === 'company') {
-        companiesGrid.hidden = false;
-        yearsGrid.hidden = true;
         filterInput.disabled = false;
         filterInput.placeholder = '输入公司名称';
       } else {
-        companiesGrid.hidden = true;
-        yearsGrid.hidden = false;
         filterInput.disabled = true;
         filterInput.placeholder = '按年份浏览';
       }
     }
+
+    // Sync toggle button + filter state with the (possibly restored) view
+    setView(currentView);
 
     filterInput.addEventListener('input', applyFilter);
     viewBtns.forEach(function(b) {

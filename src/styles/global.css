@@ -595,6 +595,15 @@ h6 {
     display: none;
 }
 
+/* View-mode switching — default (no attr) shows companies; year mode flips */
+html:not([data-all-view="year"]) #years-grid {
+    display: none;
+}
+
+html[data-all-view="year"] #companies-grid {
+    display: none;
+}
+
 .company-card {
     display: flex;
     flex-direction: column;
