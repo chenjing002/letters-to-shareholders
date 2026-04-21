@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import { getCollection } from 'astro:content';
 
 interface Props {
   title: string;
@@ -10,6 +11,28 @@ interface Props {
 
 const { title, description = '中国上市公司致股东信合集', bodyClass } = Astro.props;
 const base = import.meta.env.BASE_URL;
+
+// Active-link detection (handles both / and /letters-to-shareholders/ bases)
+const pathname = Astro.url.pathname;
+const normalized = pathname.replace(/\/+$/, '');
+const companiesActive = normalized.endsWith('/all-companies');
+const yearsActive = normalized.endsWith('/all-years');
+
+// Bake a company list into the header so the global search dropdown
+// works on every page without a separate endpoint.
+const allLetters = await getCollection('letters');
+const companiesMap = new Map<string, { slug: string; name: string; count: number }>();
+for (const l of allLetters) {
+  const s = l.slug.split('/')[0];
+  if (!companiesMap.has(s)) {
+    companiesMap.set(s, { slug: s, name: l.data.company, count: 0 });
+  }
+  companiesMap.get(s)!.count++;
+}
+const headerCompanies = Array.from(companiesMap.values()).sort((a, b) =>
+  b.count - a.count || a.name.localeCompare(b.name, 'zh-CN')
+);
+const headerCompaniesJson = JSON.stringify(headerCompanies);
 ---
 
 <!doctype html>
@@ -35,11 +58,52 @@ const base = import.meta.env.BASE_URL;
   <body class={bodyClass}>
     <div class="container">
       <header class="site-header">
-        <a href={base} class="site-header__logo">致股东信</a>
+        <a href={base} class="site-header__logo">
+          <svg class="site-header__logo-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="4" fill="#24837B"/>
+            <text x="16" y="23" font-size="18" text-anchor="middle" fill="#FFFCF0" font-family="serif" font-weight="bold">信</text>
+          </svg>
+          <span>致股东信</span>
+        </a>
+        <nav class="site-nav" aria-label="主导航">
+          <a
+            href={`${base}all-companies/`}
+            class:list={["site-nav__link", { "is-active": companiesActive }]}
+          >公司</a>
+          <a
+            href={`${base}all-years/`}
+            class:list={["site-nav__link", { "is-active": yearsActive }]}
+          >年份</a>
+        </nav>
         <div class="site-header__actions">
+          <button
+            type="button"
+            class="header-search-btn"
+            id="header-search-btn"
+            aria-label="搜索公司"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+          </button>
           <ThemeToggle />
         </div>
       </header>
+
+      <div class="header-search-panel" id="header-search-panel" hidden>
+        <div class="header-search-panel__inner">
+          <input
+            type="text"
+            class="header-search-panel__input"
+            id="header-search-input"
+            placeholder="输入公司名称"
+            autocomplete="off"
+          />
+          <div class="header-search-panel__results" id="header-search-results"></div>
+        </div>
+      </div>
+
       <main>
         <slot />
       </main>
@@ -47,5 +111,61 @@ const base = import.meta.env.BASE_URL;
         中国上市公司致股东信合集
       </footer>
     </div>
+
+    <script is:inline define:vars={{ headerCompaniesJson, baseUrl: base }}>
+      (function() {
+        var companies = JSON.parse(headerCompaniesJson);
+        var btn = document.getElementById('header-search-btn');
+        var panel = document.getElementById('header-search-panel');
+        var input = document.getElementById('header-search-input');
+        var results = document.getElementById('header-search-results');
+        if (!btn || !panel || !input || !results) return;
+
+        function open() {
+          panel.hidden = false;
+          // Wait for next frame so transitions (if any) apply
+          requestAnimationFrame(function() { input.focus(); });
+        }
+        function close() {
+          panel.hidden = true;
+          input.value = '';
+          results.innerHTML = '';
+        }
+
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (panel.hidden) open(); else close();
+        });
+
+        document.addEventListener('click', function(e) {
+          if (panel.hidden) return;
+          if (panel.contains(e.target) || btn.contains(e.target)) return;
+          close();
+        });
+
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && !panel.hidden) close();
+        });
+
+        input.addEventListener('input', function() {
+          var q = input.value.trim().toLowerCase();
+          if (!q) { results.innerHTML = ''; return; }
+          var matches = companies.filter(function(c) {
+            return c.name.toLowerCase().indexOf(q) !== -1;
+          });
+          if (!matches.length) {
+            results.innerHTML = '<div class="header-search-panel__empty">未找到匹配的公司</div>';
+            return;
+          }
+          results.innerHTML = matches.map(function(c) {
+            return '<a class="header-search-panel__item" href="' +
+              baseUrl + 'company/' + c.slug + '/">' +
+              '<span>' + c.name + '</span>' +
+              '<span class="header-search-panel__count">' + c.count + ' 封</span>' +
+              '</a>';
+          }).join('');
+        });
+      })();
+    </script>
   </body>
 </html>

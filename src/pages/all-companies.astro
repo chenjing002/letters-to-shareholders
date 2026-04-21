@@ -5,7 +5,6 @@ import { buildColorMap } from '../utils/company-colors';
 
 const allLetters = await getCollection('letters');
 
-// ── Group by company ────────────────────────────────────────
 const companiesMap = new Map<string, { slug: string; name: string; count: number }>();
 
 for (const letter of allLetters) {
@@ -24,77 +23,20 @@ const companies = Array.from(companiesMap.values()).sort((a, b) =>
   b.count - a.count || a.name.localeCompare(b.name, 'zh-CN')
 );
 
-// ── Group by year ───────────────────────────────────────────
-const yearsMap = new Map<number, Set<string>>();
-for (const letter of allLetters) {
-  const year = letter.data.year;
-  const companySlug = letter.slug.split('/')[0];
-  if (!yearsMap.has(year)) yearsMap.set(year, new Set());
-  yearsMap.get(year)!.add(companySlug);
-}
-
-const years = Array.from(yearsMap.entries())
-  .map(([year, slugs]) => ({ year, count: slugs.size }))
-  .sort((a, b) => b.year - a.year);
-
 const totalCompanies = companies.length;
 const totalLetters = allLetters.length;
 const base = import.meta.env.BASE_URL;
 const colorMap = buildColorMap(companies.map(c => c.slug));
-const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
 ---
 
-<BaseLayout title="全部公司 — 致股东信">
-  <script is:inline>
-    // Restore view mode before paint to avoid flicker
-    try {
-      var v = sessionStorage.getItem('all-companies:view');
-      if (v === 'year' || v === 'company') {
-        document.documentElement.setAttribute('data-all-view', v);
-      }
-    } catch (e) {}
-  </script>
-
-  <nav class="breadcrumb">
-    <a href={base}>首页</a>
-    <span class="breadcrumb__sep">/</span>
-    <span>全部公司</span>
-  </nav>
-
+<BaseLayout title="公司 — 致股东信">
   <section class="all-companies-header">
     <p class="all-companies-header__stats">
       {totalCompanies} 家上市公司 | {totalLetters} 封致股东信
     </p>
   </section>
 
-  <div class="search search--all">
-    <input
-      type="text"
-      class="search__input"
-      id="filter-input"
-      placeholder="输入公司名称"
-      autocomplete="off"
-    />
-  </div>
-
-  <div class="view-toggle" role="tablist" aria-label="查看方式">
-    <button
-      type="button"
-      role="tab"
-      class="view-toggle__btn is-active"
-      data-view="company"
-      aria-selected="true"
-    >按公司</button>
-    <button
-      type="button"
-      role="tab"
-      class="view-toggle__btn"
-      data-view="year"
-      aria-selected="false"
-    >按年份</button>
-  </div>
-
-  <section class="all-companies-grid" id="companies-grid" data-active>
+  <section class="all-companies-grid" id="companies-grid">
     {companies.map((company) => {
       const color = colorMap[company.slug];
       return (
@@ -110,77 +52,4 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
       );
     })}
   </section>
-
-  <section class="all-companies-grid" id="years-grid">
-    {years.map((y) => {
-      const color = yearColorMap[`year-${y.year}`];
-      return (
-        <a
-          href={`${base}year/${y.year}/`}
-          class="company-card year-card"
-          style={`--cc-bg: ${color.bg}; --cc-text: ${color.text};`}
-          data-name={`${y.year}`}
-        >
-          <div class="company-card__name">{y.year} 年</div>
-          <div class="company-card__count">{y.count} 家公司</div>
-        </a>
-      );
-    })}
-  </section>
 </BaseLayout>
-
-<script is:inline>
-  (function() {
-    var filterInput = document.getElementById('filter-input');
-    var companiesGrid = document.getElementById('companies-grid');
-    var yearsGrid = document.getElementById('years-grid');
-    var companyCards = companiesGrid.querySelectorAll('.company-card');
-    var yearCards = yearsGrid.querySelectorAll('.company-card');
-    var viewBtns = document.querySelectorAll('.view-toggle__btn');
-
-    var STORAGE_KEY = 'all-companies:view';
-    var currentView =
-      document.documentElement.getAttribute('data-all-view') === 'year'
-        ? 'year'
-        : 'company';
-
-    function applyFilter() {
-      var query = filterInput.value.trim().toLowerCase();
-      var cards = currentView === 'year' ? yearCards : companyCards;
-      cards.forEach(function(card) {
-        var name = card.getAttribute('data-name').toLowerCase();
-        card.style.display = name.indexOf(query) !== -1 ? '' : 'none';
-      });
-    }
-
-    function setView(view) {
-      currentView = view;
-      try { sessionStorage.setItem(STORAGE_KEY, view); } catch (e) {}
-      document.documentElement.setAttribute('data-all-view', view);
-
-      viewBtns.forEach(function(b) {
-        var active = b.getAttribute('data-view') === view;
-        b.classList.toggle('is-active', active);
-        b.setAttribute('aria-selected', active ? 'true' : 'false');
-      });
-
-      filterInput.placeholder =
-        view === 'year' ? '输入年份' : '输入公司名称';
-
-      // Clear query + reset visibility so switching modes starts clean
-      filterInput.value = '';
-      companyCards.forEach(function(c) { c.style.display = ''; });
-      yearCards.forEach(function(c) { c.style.display = ''; });
-    }
-
-    // Sync toggle button + filter state with the (possibly restored) view
-    setView(currentView);
-
-    filterInput.addEventListener('input', applyFilter);
-    viewBtns.forEach(function(b) {
-      b.addEventListener('click', function() {
-        setView(b.getAttribute('data-view'));
-      });
-    });
-  })();
-</script>
