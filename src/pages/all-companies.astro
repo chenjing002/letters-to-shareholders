@@ -119,6 +119,7 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
           href={`${base}year/${y.year}/`}
           class="company-card year-card"
           style={`--cc-bg: ${color.bg}; --cc-text: ${color.text};`}
+          data-name={`${y.year}`}
         >
           <div class="company-card__name">{y.year} 年</div>
           <div class="company-card__count">{y.count} 家公司</div>
@@ -132,7 +133,9 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
   (function() {
     var filterInput = document.getElementById('filter-input');
     var companiesGrid = document.getElementById('companies-grid');
+    var yearsGrid = document.getElementById('years-grid');
     var companyCards = companiesGrid.querySelectorAll('.company-card');
+    var yearCards = yearsGrid.querySelectorAll('.company-card');
     var viewBtns = document.querySelectorAll('.view-toggle__btn');
 
     var STORAGE_KEY = 'all-companies:view';
@@ -143,7 +146,8 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
 
     function applyFilter() {
       var query = filterInput.value.trim().toLowerCase();
-      companyCards.forEach(function(card) {
+      var cards = currentView === 'year' ? yearCards : companyCards;
+      cards.forEach(function(card) {
         var name = card.getAttribute('data-name').toLowerCase();
         card.style.display = name.indexOf(query) !== -1 ? '' : 'none';
       });
@@ -160,13 +164,13 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
         b.setAttribute('aria-selected', active ? 'true' : 'false');
       });
 
-      if (view === 'company') {
-        filterInput.disabled = false;
-        filterInput.placeholder = '输入公司名称';
-      } else {
-        filterInput.disabled = true;
-        filterInput.placeholder = '按年份浏览';
-      }
+      filterInput.placeholder =
+        view === 'year' ? '输入年份' : '输入公司名称';
+
+      // Clear query + reset visibility so switching modes starts clean
+      filterInput.value = '';
+      companyCards.forEach(function(c) { c.style.display = ''; });
+      yearCards.forEach(function(c) { c.style.display = ''; });
     }
 
     // Sync toggle button + filter state with the (possibly restored) view
