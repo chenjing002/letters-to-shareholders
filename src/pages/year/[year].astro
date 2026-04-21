@@ -60,7 +60,6 @@ const rendered = await Promise.all(
 
   <div class="reader reader--by-year" id="reader">
     <nav class="reader__sidebar">
-      <div class="reader__sidebar-title">{year} 年 · {letters.length} 家</div>
       <div class="reader__years">
         {rendered.map((r, i) => (
           <button

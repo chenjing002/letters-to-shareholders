@@ -700,14 +700,6 @@ h6 {
     gap: 0.35rem;
 }
 
-.reader__sidebar-title {
-    font-family: "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
-    font-size: 0.8125rem;
-    color: var(--tx-2);
-    padding: 0 0.75rem 0.5rem;
-    font-weight: 500;
-}
-
 .reader__year-btn {
     display: flex;
     align-items: center;
