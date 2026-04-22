@@ -58,7 +58,13 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
   <body class={bodyClass}>
     <div class="container">
       <header class="site-header">
-        <a href={base} class="site-header__logo">致股东信</a>
+        <a href={base} class="site-header__logo" aria-label="致股东信 首页">
+          <svg class="site-header__logo-svg" width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="4" fill="#24837B"/>
+            <text x="16" y="23" font-size="18" text-anchor="middle" fill="#FFFCF0" font-family="serif" font-weight="bold">信</text>
+          </svg>
+          <span class="site-header__logo-text">致股东信</span>
+        </a>
         <nav class="site-nav" aria-label="主导航">
           <a
             href={`${base}all-companies/`}
@@ -85,7 +91,7 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
         </div>
       </header>
 
-      <div class="header-search-panel" id="header-search-panel" hidden>
+      <div class="header-search-panel" id="header-search-panel">
         <div class="header-search-panel__inner">
           <input
             type="text"
@@ -116,29 +122,30 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
         if (!btn || !panel || !input || !results) return;
 
         function open() {
-          panel.hidden = false;
-          // Wait for next frame so transitions (if any) apply
-          requestAnimationFrame(function() { input.focus(); });
+          panel.classList.add('is-open');
+          btn.classList.add('is-active');
+          input.focus();
         }
         function close() {
-          panel.hidden = true;
+          panel.classList.remove('is-open');
+          btn.classList.remove('is-active');
           input.value = '';
           results.innerHTML = '';
         }
 
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
-          if (panel.hidden) open(); else close();
+          if (panel.classList.contains('is-open')) close(); else open();
         });
 
         document.addEventListener('click', function(e) {
-          if (panel.hidden) return;
+          if (!panel.classList.contains('is-open')) return;
           if (panel.contains(e.target) || btn.contains(e.target)) return;
           close();
         });
 
         document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape' && !panel.hidden) close();
+          if (e.key === 'Escape' && panel.classList.contains('is-open')) close();
         });
 
         input.addEventListener('input', function() {
