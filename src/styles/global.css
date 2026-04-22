@@ -93,13 +93,7 @@ html {
 }
 
 body {
-    font-family:
-        "Noto Serif SC",
-        "Source Han Serif SC",
-        "SimSun",
-        Georgia,
-        "Times New Roman",
-        serif;
+    font-family: "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
     font-size: 1rem;
     line-height: 1.7;
     color: var(--tx);
@@ -125,6 +119,13 @@ img {
     height: auto;
 }
 
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
 /* ============================================
    Typography
    ============================================ */
@@ -135,9 +136,7 @@ h3,
 h4,
 h5,
 h6 {
-    font-family:
-        "Noto Serif SC", "Source Han Serif SC", "SimSun", Georgia,
-        "Times New Roman", serif;
+    font-family: "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
     font-weight: 700;
     line-height: 1.3;
     color: var(--tx);
@@ -686,17 +685,6 @@ h6 {
 /* ============================================
    All Companies Page
    ============================================ */
-
-.all-companies-header {
-    padding: 2rem 0 1.5rem;
-    text-align: center;
-}
-
-.all-companies-header__stats {
-    font-size: 1.375rem;
-    color: var(--tx);
-    font-weight: 600;
-}
 
 .search--all {
     margin-bottom: 1.25rem;

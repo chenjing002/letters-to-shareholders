@@ -24,10 +24,9 @@ const yearColorMap = buildColorMap(years.map(y => `year-${y.year}`));
 ---
 
 <BaseLayout title="年份 — 致股东信">
-  <section class="all-companies-header">
-    <p class="all-companies-header__stats">
-      {totalYears} 个年份 | {totalLetters} 封致股东信
-    </p>
+  <section class="hero">
+    <h1 class="hero__title">{totalYears} 个年份</h1>
+    <p class="hero__subtitle">{totalLetters} 封致股东信</p>
   </section>
 
   <section class="all-companies-grid" id="years-grid">

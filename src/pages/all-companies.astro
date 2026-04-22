@@ -30,10 +30,9 @@ const colorMap = buildColorMap(companies.map(c => c.slug));
 ---
 
 <BaseLayout title="公司 — 致股东信">
-  <section class="all-companies-header">
-    <p class="all-companies-header__stats">
-      {totalCompanies} 家上市公司 | {totalLetters} 封致股东信
-    </p>
+  <section class="hero">
+    <h1 class="hero__title">{totalCompanies} 家上市公司</h1>
+    <p class="hero__subtitle">{totalLetters} 封致股东信</p>
   </section>
 
   <section class="all-companies-grid" id="companies-grid">
