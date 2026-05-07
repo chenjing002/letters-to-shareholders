@@ -40,6 +40,7 @@ const SLUG_MAP = {
   "美的集团": "midea",
   "中国平安": "pingan",
   "龙湖集团": "longfor",
+  "长江电力": "yangtze-power",
 };
 
 // ── helpers ─────────────────────────────────────────────────────
@@ -115,7 +116,7 @@ for (const dir of companyDirs.sort()) {
   // Collect letter files, ignore macOS ._* metadata
   const files = fs
     .readdirSync(srcDir)
-    .filter((f) => f.endsWith(".md") && !f.startsWith("._"));
+    .filter((f) => f.endsWith("-致股东信.md") && !f.startsWith("._"));
 
   for (const file of files.sort()) {
     // Extract year from filename: {公司名}-{year}-致股东信.md
@@ -133,9 +134,10 @@ for (const dir of companyDirs.sort()) {
 
     // Check for existing content collection file
     const destFile = path.join(destDir, `${year}.md`);
+    const destExists = fs.existsSync(destFile);
     let attrs;
 
-    if (fs.existsSync(destFile)) {
+    if (destExists) {
       const existing = fs.readFileSync(destFile, "utf-8");
       const parsed = parseFrontmatter(existing);
 
@@ -167,12 +169,12 @@ for (const dir of companyDirs.sort()) {
     const output = buildFrontmatter(attrs) + "\n\n" + originalBody.trimStart();
 
     if (dryRun) {
-      const action = fs.existsSync(destFile) ? "UPDATE" : "CREATE";
+      const action = destExists ? "UPDATE" : "CREATE";
       console.log(`${action}  ${slug}/${year}.md`);
     } else {
       fs.mkdirSync(destDir, { recursive: true });
       fs.writeFileSync(destFile, output, "utf-8");
-      if (fs.existsSync(destFile)) {
+      if (destExists) {
         updated++;
         console.log(`✓ updated  ${slug}/${year}.md`);
       } else {
@@ -183,7 +185,7 @@ for (const dir of companyDirs.sort()) {
 
     if (dryRun) {
       // Count for dry-run summary
-      if (fs.existsSync(destFile)) updated++;
+      if (destExists) updated++;
       else created++;
     }
   }
