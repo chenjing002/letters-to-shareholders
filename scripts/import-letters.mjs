@@ -41,6 +41,7 @@ const SLUG_MAP = {
   "中国平安": "pingan",
   "龙湖集团": "longfor",
   "长江电力": "yangtze-power",
+  "中海发展": "china-overseas",
 };
 
 // ── helpers ─────────────────────────────────────────────────────
