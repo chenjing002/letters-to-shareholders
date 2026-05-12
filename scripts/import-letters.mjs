@@ -42,6 +42,7 @@ const SLUG_MAP = {
   "龙湖集团": "longfor",
   "长江电力": "yangtze-power",
   "中海发展": "china-overseas",
+  "雅戈尔": "youngor",
 };
 
 // ── helpers ─────────────────────────────────────────────────────
