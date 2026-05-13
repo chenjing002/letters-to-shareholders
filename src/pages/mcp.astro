@@ -1,0 +1,238 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="MCP & API — 致股东信">
+  <section class="hero">
+    <h1 class="hero__title">MCP & API 服务</h1>
+    <p class="hero__subtitle">面向 AI 智能体与研究工作流的中国上市公司致股东信接口</p>
+  </section>
+
+  <article class="prose mcp-page">
+    <h2>套餐与定价</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>功能 / 服务</th>
+          <th>基础版</th>
+          <th>高级版</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>价格</td><td>¥19 / 月</td><td>¥99 / 月</td></tr>
+        <tr><td>每月 API / MCP 调用</td><td>1,000</td><td>10,000</td></tr>
+        <tr><td>REST API 访问</td><td>✅</td><td>✅</td></tr>
+        <tr><td>MCP Server 访问</td><td>✅</td><td>✅</td></tr>
+        <tr><td>完整致股东信</td><td>✅</td><td>✅</td></tr>
+        <tr><td>Markdown 正文返回</td><td>✅</td><td>✅</td></tr>
+        <tr><td>公司列表查询</td><td>✅</td><td>✅</td></tr>
+        <tr><td>年度信件列表查询</td><td>✅</td><td>✅</td></tr>
+        <tr><td>单封信件获取</td><td>✅</td><td>✅</td></tr>
+        <tr><td>BM25 全文检索</td><td>✅</td><td>✅</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mcp-cta">
+      <button type="button" id="mcp-cta-btn" class="mcp-cta__btn">获取 API Key</button>
+      <p class="mcp-cta__hint">购买访问权限或申请 API Key，请通过邮件联系。</p>
+    </div>
+
+    <h2>REST API</h2>
+    <p>Base URL：</p>
+    <pre><code>https://cn-filings.chenjingluote.workers.dev</code></pre>
+    <p>REST API 提供公司列表、年度致股东信、Markdown 正文与全文检索能力。</p>
+    <table>
+      <thead>
+        <tr><th>接口</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>GET /</code></td><td>服务索引</td></tr>
+        <tr><td><code>GET /companies</code></td><td>列出全部公司</td></tr>
+        <tr><td><code>GET /companies/{'{slug}'}</code></td><td>获取单家公司信息</td></tr>
+        <tr><td><code>GET /companies/{'{slug}'}/letters</code></td><td>列出某公司可用的致股东信</td></tr>
+        <tr><td><code>GET /letters/{'{slug}'}/{'{year}'}</code></td><td>获取某公司某年完整致股东信（含 Markdown 正文）</td></tr>
+        <tr><td><code>GET /search?q=&amp;company=&amp;year_from=&amp;year_to=&amp;limit=20</code></td><td>检索致股东信，可按公司、年份与数量过滤</td></tr>
+      </tbody>
+    </table>
+
+    <h3>搜索模式</h3>
+    <p>搜索使用分层 BM25 流水线，响应中包含 <code>mode</code> 与可读的 <code>note</code> 字段。</p>
+    <table>
+      <thead>
+        <tr><th>模式</th><th>触发条件</th><th>匹配逻辑</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>fts-phrase</code></td><td>查询长度 ≥ 3 且存在完整短语匹配</td><td>完整短语命中，BM25 排序，精度最高</td></tr>
+        <tr><td><code>fts-and</code></td><td>无短语命中，但所有 3 字窗口均匹配</td><td>多片段 AND 匹配，BM25 排序</td></tr>
+        <tr><td><code>fts-or</code></td><td>无 AND 命中，但至少一个 3 字窗口匹配</td><td>多片段 OR 匹配，召回更高</td></tr>
+        <tr><td><code>like</code></td><td>查询长度 &lt; 3</td><td><code>LIKE</code> 兜底，按年份倒序</td></tr>
+      </tbody>
+    </table>
+
+    <h2>MCP Server</h2>
+    <p>MCP 端点：</p>
+    <pre><code>POST https://cn-filings.chenjingluote.workers.dev/mcp</code></pre>
+    <p>传输方式：Streamable HTTP，无状态。</p>
+    <p>可作为远程 MCP Server 接入 Claude Desktop、Claude Code、Cursor 等兼容客户端。</p>
+
+    <h3>MCP 工具</h3>
+    <table>
+      <thead>
+        <tr><th>工具</th><th>参数</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>list_companies</code></td><td>无</td><td>列出全部公司</td></tr>
+        <tr><td><code>list_letters</code></td><td><code>{'{ company }'}</code></td><td>列出某公司可用的致股东信</td></tr>
+        <tr><td><code>get_letter</code></td><td><code>{'{ company, year }'}</code></td><td>获取某公司某年完整致股东信</td></tr>
+        <tr><td><code>search_letters</code></td><td><code>{'{ q, company?, year_from?, year_to?, limit? }'}</code></td><td>检索致股东信，返回结构与 <code>/search</code> 相同</td></tr>
+      </tbody>
+    </table>
+
+    <h3>MCP 资源</h3>
+    <p>每封致股东信都暴露为一个 MCP Resource：</p>
+    <pre><code>letter://{'{company-slug}'}/{'{year}'}</code></pre>
+    <p>资源 MIME 类型：<code>text/markdown</code>。</p>
+    <table>
+      <thead>
+        <tr><th>能力</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>resources/list</code></td><td>列出全部可用的信件资源</td></tr>
+        <tr><td><code>resources/read</code></td><td>读取选定信件的 Markdown 正文</td></tr>
+        <tr><td><code>resources/templates/list</code></td><td>返回资源 URI 模板</td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <div class="mcp-modal" id="mcp-modal" hidden>
+    <div class="mcp-modal__backdrop" data-mcp-close></div>
+    <div class="mcp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="mcp-modal-title">
+      <button type="button" class="mcp-modal__close" data-mcp-close aria-label="关闭">×</button>
+      <h3 id="mcp-modal-title" class="mcp-modal__title">获取 API Key</h3>
+      <p>购买访问权限或申请 API Key，请联系：</p>
+      <p class="mcp-modal__email">
+        <a href="mailto:1015049570@qq.com?subject=cn-filings%20API%20Key">1015049570@qq.com</a>
+      </p>
+      <p class="mcp-modal__hint">请在邮件中注明您选择的套餐：<strong>基础版</strong> 或 <strong>高级版</strong>。</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .mcp-page pre {
+    background: var(--bg-2);
+    border: 1px solid var(--ui);
+    border-radius: 6px;
+    padding: 0.75em 1em;
+    overflow-x: auto;
+    margin: 1em 0 1.5em;
+    font-size: 0.9375rem;
+  }
+  .mcp-page code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+  }
+  .mcp-page :not(pre) > code {
+    background: var(--bg-2);
+    border: 1px solid var(--ui);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+  }
+  .mcp-page pre code {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .mcp-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+    margin: 2em 0 2.5em;
+    padding: 1.5em;
+    background: var(--bg-2);
+    border: 1px solid var(--ui);
+    border-radius: 8px;
+  }
+  .mcp-cta__btn {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.65em 1.6em;
+    border-radius: 6px;
+    border: none;
+    background: var(--accent);
+    color: var(--bg);
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .mcp-cta__btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .mcp-cta__hint { margin: 0; color: var(--tx-2); font-size: 0.9375rem; }
+
+  .mcp-modal[hidden] { display: none; }
+  .mcp-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mcp-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(16, 15, 15, 0.45);
+  }
+  .mcp-modal__panel {
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--ui);
+    border-radius: 10px;
+    padding: 2em 2.25em;
+    max-width: 24rem;
+    width: calc(100% - 2rem);
+    box-shadow: 0 12px 32px var(--card-hover-shadow);
+    text-align: center;
+  }
+  .mcp-modal__close {
+    position: absolute;
+    top: 0.5em;
+    right: 0.75em;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--tx-2);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .mcp-modal__close:hover { color: var(--tx); }
+  .mcp-modal__title { margin: 0 0 0.75em; font-size: 1.25rem; }
+  .mcp-modal__email {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin: 0.5em 0 1em;
+  }
+  .mcp-modal__email a { color: var(--accent); text-decoration: none; }
+  .mcp-modal__email a:hover { text-decoration: underline; }
+  .mcp-modal__hint { color: var(--tx-2); font-size: 0.9375rem; margin: 0; }
+</style>
+
+<script is:inline>
+  (function () {
+    var btn = document.getElementById('mcp-cta-btn');
+    var modal = document.getElementById('mcp-modal');
+    if (!btn || !modal) return;
+
+    function open() { modal.hidden = false; }
+    function close() { modal.hidden = true; }
+
+    btn.addEventListener('click', open);
+    modal.querySelectorAll('[data-mcp-close]').forEach(function (el) {
+      el.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) close();
+    });
+  })();
+</script>

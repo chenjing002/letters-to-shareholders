@@ -18,6 +18,7 @@ const pathname = Astro.url.pathname;
 const normalized = pathname.replace(/\/+$/, '');
 const companiesActive = normalized.endsWith('/all-companies');
 const yearsActive = normalized.endsWith('/all-years');
+const mcpActive = normalized.endsWith('/mcp');
 
 // Bake a company list into the header so the global search dropdown
 // works on every page without a separate endpoint.
@@ -75,6 +76,10 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
             href={`${base}all-years/`}
             class:list={["site-nav__link", { "is-active": yearsActive }]}
           >年份</a>
+          <a
+            href={`${base}mcp/`}
+            class:list={["site-nav__link", { "is-active": mcpActive }]}
+          >MCP</a>
         </nav>
         <div class="site-header__actions">
           <button
