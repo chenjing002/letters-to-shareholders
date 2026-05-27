@@ -32,13 +32,7 @@ const dryRun = !process.argv.includes("--write");
 // Add new entries here when new companies are added to letters/.
 const SLUG_MAP = {
   "万科 A": "vanke",
-  "腾讯控股": "tencent",
-  "贵州茅台": "moutai",
-  "招商银行": "cmb",
-  "比亚迪": "byd",
-  "格力电器": "gree",
   "美的集团": "midea",
-  "中国平安": "pingan",
   "龙湖集团": "longfor",
   "长江电力": "yangtze-power",
   "中海发展": "china-overseas",
