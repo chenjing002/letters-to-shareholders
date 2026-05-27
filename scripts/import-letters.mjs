@@ -43,6 +43,8 @@ const SLUG_MAP = {
   "长江电力": "yangtze-power",
   "中海发展": "china-overseas",
   "雅戈尔": "youngor",
+  "万物云": "onewo",
+  "恒隆地产": "hang-lung",
 };
 
 // ── helpers ─────────────────────────────────────────────────────
