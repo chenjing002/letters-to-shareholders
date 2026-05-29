@@ -45,6 +45,9 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
     <script is:inline>
       // Restore theme before paint to avoid flash
       (function() {
@@ -58,8 +61,8 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
     </script>
   </head>
   <body class={bodyClass}>
-    <div class="container">
-      <header class="site-header">
+    <header class="site-header">
+      <div class="site-header__inner">
         <a href={base} class="site-header__logo" aria-label="致股东信 首页">
           <svg class="site-header__logo-svg" width="28" height="28" viewBox="0 0 100 100" aria-hidden="true">
             <rect width="100" height="100" rx="20" fill="#8b2500"/>
@@ -95,8 +98,10 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
           </button>
           <ThemeToggle />
         </div>
-      </header>
+      </div>
+    </header>
 
+    <div class="container">
       <div class="header-search-panel" id="header-search-panel">
         <div class="header-search-panel__inner">
           <input
@@ -114,7 +119,11 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
         <slot />
       </main>
       <footer class="site-footer">
-        中国上市公司致股东信合集
+        <div class="site-footer__text">中国上市公司致股东信合集</div>
+        <div class="site-footer__links">
+          <a href="https://aimunger.com/">aimunger</a>
+          <a href="https://aimunger.com/llm-reader/">LLM Reader</a>
+        </div>
       </footer>
     </div>
 
