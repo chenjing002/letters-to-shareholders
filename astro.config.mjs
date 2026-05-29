@@ -3,8 +3,8 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
 export default defineConfig({
-  site: 'https://chenjing002.github.io',
-  base: '/letters-to-shareholders/',
+  site: 'https://aimunger.com',
+  base: '/letters/',
   output: 'static',
   markdown: {
     remarkPlugins: [remarkMath],
