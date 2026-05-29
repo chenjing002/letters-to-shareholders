@@ -48,3 +48,15 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify-aimunger:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger aimunger rebuild
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.AIMUNGER_DEPLOY_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/chenjing002/aimunger/dispatches \
+            -d '{"event_type":"subsite-updated","client_payload":{"source":"letters-to-shareholders"}}'

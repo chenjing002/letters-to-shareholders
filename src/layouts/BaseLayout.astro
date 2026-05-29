@@ -8,10 +8,12 @@ interface Props {
   title: string;
   description?: string;
   bodyClass?: string;
+  ogType?: string;
 }
 
-const { title, description = '中国上市公司致股东信合集', bodyClass } = Astro.props;
+const { title, description = '中国上市公司致股东信合集', bodyClass, ogType = 'website' } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Active-link detection (handles both / and /letters-to-shareholders/ bases)
 const pathname = Astro.url.pathname;
@@ -44,6 +46,13 @@ const headerCompaniesJson = JSON.stringify(headerCompanies);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="canonical" href={canonicalURL.href} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="致股东信 — aimunger" />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

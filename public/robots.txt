@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chenjing002.github.io/letters-to-shareholders/sitemap.xml
