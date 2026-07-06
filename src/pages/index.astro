@@ -25,6 +25,7 @@ const companies = Array.from(companiesMap.values()).sort((a, b) =>
 );
 
 const totalCompanies = companies.length;
+const totalLetters = allLetters.length;
 const base = import.meta.env.BASE_URL;
 
 const colorMap = buildColorMap(companies.map(c => c.slug));
@@ -42,7 +43,7 @@ const companiesJson = JSON.stringify(companiesWithColors);
   <section class="hero">
     <h1 class="hero__title">致股东信</h1>
     <p class="hero__subtitle">
-      已收录 <a href={`${base}all-companies/`} class="hero__count">{totalCompanies}</a> 家上市公司
+      已收录 <a href={`${base}all-companies/`} class="hero__count">{totalCompanies}</a> 家上市公司，共计 {totalLetters} 封致股东信
     </p>
   </section>
 
